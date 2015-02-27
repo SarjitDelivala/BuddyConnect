@@ -1,0 +1,482 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package buddyconnect;
+
+
+import classlib.Buddy;
+import classlib.Common;
+import classlib.DatabaseData;
+import classlib.UserSession;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import javax.swing.*;
+import threads.BuddyList;
+import threads.CheckNet;
+import threads.IncomingCheckThread;
+
+/**
+ *
+ * @author SJPVAPCPCPP
+ */
+
+public class Home extends javax.swing.JFrame
+{
+
+    static String userId;    
+    public static BuddyList buddies;
+    BuddyList incomingBuddies;
+    public static IncomingCheckThread income;
+    public static String userType;
+    UserSession userObject;
+    
+    public Home(String userID) 
+    {
+        userId = userID;
+        buddies = new BuddyList(userId);
+        buddies.start();
+        Common.getLocations(); // get current location from internet
+        Option.setActiveStatusFalse(); //set acrive screen status false so another option screen will not be displayed
+    }
+    
+    public void setInternetLabel()
+    {
+        lblInternet.setOpaque(true);
+        Color c = new Color(51, 51, 51);
+        Font f = new Font("Arial",Font.BOLD, 14);
+        lblInternet.setFont(f);
+        lblInternet.setBackground(c);
+        lblLocation.setText(Common.getCountryCode() + "," + Common.getCity());
+        
+        String city="null";
+        while(city.equals("null"))
+        {
+            city =  Common.getCity();
+        }
+        DatabaseData.updateUserLocation(userId,city);
+    }
+    
+    public void setProfilePicture() 
+    {
+        String str = "http://buddyconnect.in/uploads/" + userId + ".jpg";
+        URL profileUrl;
+        try {
+            profileUrl = new URL(str);
+            lblProfilePicture.setIcon(new ImageIcon(profileUrl));
+        } catch (MalformedURLException ex) {
+            lblProfilePicture.setText("No Profile Picture Found");
+        }
+            
+    }
+    
+    public void setButtonIcon(JButton btn)
+    {
+        btn.setOpaque(true);
+        Color c = new Color(51, 51, 51);
+        btn.setBackground(c);
+        btn.setIcon(new ImageIcon("collection\\refresh3.png"));
+    }
+    
+    public void resfreshBuddyList()
+    {
+        Home.setBuddyList(DatabaseData.getFriendList(userId)); //get buddy list and set it to 
+    }
+    
+    public void startUpFunctions()
+    {
+        setButtonIcon(btnRefresh);
+     
+        setButtonIcon(btnRegenerate);
+        
+        setProfilePicture();
+    }
+    
+    public void start()
+    {
+        setVisible(true);
+        
+        Common.setIcon(this);
+        
+        Common.setCenterGravity(this);
+        
+        initComponents();
+        
+        startUpFunctions();
+                
+        setInternetLabel(); // set the label for internet status,currrent city and country
+        
+        income = new IncomingCheckThread(userId,this);
+        income.start();
+        
+        CheckNet internetCheckThread = new CheckNet(lblInternet);
+        internetCheckThread.start();
+        
+        if(DatabaseData.AccessCode != 0) 
+        {
+            setAccessCode(); // set currently new generated access code of current user
+        }
+        
+        userObject = new UserSession();
+        userObject.setUser(userId);
+        userObject.setBuddy("");
+        
+        setClosingEvent(this,userObject); // set closing event
+        
+        setOnClickRefresh(userObject.getUser());
+    }
+    
+    public void setOnClickRefresh(final String userID)
+    {
+        btnRegenerate.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                DatabaseData.updateDataAuthnetication(userId);
+            }
+        });
+    }
+    
+    public static void stopIncomingCheckThread()
+    {
+        if(( income != null) || (!income.isInterrupted()))
+        {
+            income.interrupt(); 
+        }
+    }
+    
+    public static void stopGetFriendListThread()
+    {
+        if(( buddies != null) || (!buddies.isInterrupted()))
+        {
+            buddies.interrupt(); 
+        }
+    }
+    
+    public void setAccessCode()
+    {
+        lblAccess.setText(Integer.toString(DatabaseData.AccessCode));
+    }
+    
+    public static void setBuddyList(ArrayList<Object> data)
+    {
+        Object listData[] = data.toArray();
+        listBuddy.setListData(listData);
+    }
+    
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jPanel2 = new javax.swing.JPanel();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        listBuddy = new javax.swing.JList();
+        lblProfilePicture = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        lblAccess = new javax.swing.JLabel();
+        lblInternet = new javax.swing.JLabel();
+        lblLocation = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        btnRefresh = new javax.swing.JButton();
+        btnRegenerate = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        setTitle("Buddy Connect");
+        setBackground(new java.awt.Color(51, 51, 51));
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        setResizable(false);
+
+        jPanel1.setBackground(new java.awt.Color(51, 51, 51));
+        jPanel1.setForeground(new java.awt.Color(255, 255, 255));
+
+        jLabel1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1.setText("Buddy's List");
+
+        listBuddy.setBackground(new java.awt.Color(51, 51, 51));
+        listBuddy.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(0, 153, 255)));
+        listBuddy.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        listBuddy.setForeground(new java.awt.Color(255, 255, 255));
+        listBuddy.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        listBuddy.setToolTipText("Select buddy");
+        listBuddy.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                listSelected(evt);
+            }
+        });
+        jScrollPane1.setViewportView(listBuddy);
+
+        lblProfilePicture.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        lblProfilePicture.setForeground(new java.awt.Color(255, 255, 255));
+        lblProfilePicture.setToolTipText("Profile Picture");
+        lblProfilePicture.setAutoscrolls(true);
+
+        jLabel3.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel3.setText("Access Code");
+
+        lblAccess.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        lblAccess.setForeground(new java.awt.Color(255, 255, 255));
+        lblAccess.setText("1234");
+        lblAccess.setToolTipText("Your Current Acceddcode");
+
+        lblLocation.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        lblLocation.setForeground(new java.awt.Color(255, 255, 255));
+        lblLocation.setText("1234");
+        lblLocation.setToolTipText("Your Current Location");
+
+        jLabel5.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel5.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel5.setText("Location");
+
+        btnRefresh.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        btnRefresh.setToolTipText("Refresh Buddy List");
+        btnRefresh.setIconTextGap(1);
+        btnRefresh.setPreferredSize(new java.awt.Dimension(35, 9));
+        btnRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefreshActionPerformed(evt);
+            }
+        });
+
+        btnRegenerate.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        btnRegenerate.setToolTipText("Regenerate Access Code");
+        btnRegenerate.setIconTextGap(1);
+        btnRegenerate.setPreferredSize(new java.awt.Dimension(35, 9));
+        btnRegenerate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRegenerateActionPerformed(evt);
+            }
+        });
+
+        jButton1.setBackground(new java.awt.Color(51, 51, 51));
+        jButton1.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jButton1.setForeground(new java.awt.Color(255, 255, 255));
+        jButton1.setText("Logout");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(lblInternet, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblLocation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(lblAccess, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(btnRegenerate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 55, Short.MAX_VALUE))))
+                    .addComponent(lblProfilePicture, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 156, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnRefresh, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(30, 30, 30))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton1))
+                        .addContainerGap())))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(52, 52, 52)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
+                            .addComponent(btnRefresh, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lblProfilePicture, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(16, 16, 16)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(btnRegenerate, javax.swing.GroupLayout.DEFAULT_SIZE, 33, Short.MAX_VALUE)
+                        .addGap(1, 1, 1))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblAccess, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 17, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblLocation, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(56, 56, 56))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jButton1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addComponent(lblInternet)
+                .addGap(31, 31, 31))
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void listSelected(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_listSelected
+   try
+   {
+       Option option = null;
+       
+        if(Option.activeScreenStatus == false)
+        {      
+            Option.status = false;
+            int index = listBuddy.getSelectedIndex();
+            String buddyname = String.valueOf(listBuddy.getSelectedValue());
+            Buddy checkbuddy[] = DatabaseData.getBuddyObjectList();
+        
+            if(checkbuddy[index].getfnlName().equals(buddyname))
+            {
+                String buddyId = checkbuddy[index].getID();
+                if(DatabaseData.checkUserStatus(buddyId)) // check that buddy is free or not
+                {
+                    option = new Option(userId,buddyId,this);
+                    option.start();
+                }
+                else
+                {
+                    JOptionPane.showMessageDialog(null,checkbuddy[index].getFname() + checkbuddy[index].getLname() + " is not free at this time", "INFORMATION",JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        }
+        else
+        {
+            option.toFront();  
+        }
+   }catch(Exception e){
+       JOptionPane.showMessageDialog(null, "Please Select Buddy again");
+   }
+    }//GEN-LAST:event_listSelected
+
+    private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
+        resfreshBuddyList();
+    }//GEN-LAST:event_btnRefreshActionPerformed
+
+    private void btnRegenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegenerateActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnRegenerateActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        try
+        {
+            Common.hideForm(this);
+            
+            File f = new File("userfile");
+            FileOutputStream fout = new FileOutputStream(f);
+            BufferedOutputStream bout = new BufferedOutputStream(fout);
+            if(f.exists())
+            {
+                bout.write("null".getBytes());
+            }
+            bout.close();
+            fout.close();
+        
+            Login l = new Login();
+            l.showForm();
+            
+        }catch(Exception ex)
+        {
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
+    
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private static javax.swing.JButton btnRefresh;
+    private static javax.swing.JButton btnRegenerate;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane jScrollPane1;
+    public static javax.swing.JLabel lblAccess;
+    public static javax.swing.JLabel lblInternet;
+    public static javax.swing.JLabel lblLocation;
+    private static javax.swing.JLabel lblProfilePicture;
+    public static javax.swing.JList listBuddy;
+    // End of variables declaration//GEN-END:variables
+
+    public static void putStatusOffline()
+    {
+        try
+        {
+            DatabaseData.updateUserStatusOffline(userId);
+        }catch(Exception e) {
+            putStatusOffline();
+        }
+    }
+
+    private void setClosingEvent(Home h,final UserSession userObject) 
+    {
+        h.addWindowListener(new WindowAdapter() 
+        {
+         @Override
+             public void windowClosing(java.awt.event.WindowEvent windowEvent) 
+             {
+               if(JOptionPane.showConfirmDialog(null, "Are you sure want to Close The Home Screen ? ","Closing Home Screen",JOptionPane.YES_NO_OPTION,JOptionPane.INFORMATION_MESSAGE)==0)
+                {
+                    DatabaseData.updateUserStatusOffline(userObject.getUser());
+                    System.exit(0);
+                }
+             }
+        });
+    }
+}
